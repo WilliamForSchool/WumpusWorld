@@ -108,30 +108,30 @@ public class GameplayScreen implements Screen {
     // JANKY BUT KEEP IT OUT OF METHOD
     int x = 2;
     public int[][] pTables = {
-            {50, 10, 10, 10, 10, 10, 10, 10, 10, 50},
-            {2, 50, 20, 20, 20, 20, 20, 20, 20, 50},
-            {0, 20, 50, 30, 30, 30, 30, 30, 20, 50},
-            {9, 0, 0, 0, 40, 40, 40, 30, 20, 50},
-            {8, 20, 0, 50, 50, 50, 40, 30, 20, 50},
-            {7, 20, 30, 50, 50, 50, 40, 30, 20, 50},
-            {6, 0, 30, 50, 50, 50, 50, 30, 20, 50},
-            {5, 30, 30, 0, 30, 30, 0, 50, 20, 50},
-            {4, 30, 0, 20, 20, 20, 20, 20, 50, 10},
-            {0, 4, 2, 2, 2, 2, 2, 2, 2, 50}
+            {20, 16, 1, 1, 1, 1, 1, 1, 1, 2},
+            {16, 20, 2, 1, 1, 1, 1, 1, 4, 4},
+            {14, 2, 20, 2, 1, 1, 1, 6, 1, 6},
+            {12, 1, 2, 20, 2, 2, 8, 1, 1, 8},
+            {10, 1, 1, 2, 20, 10, 1, 1, 1, 10},
+            {8, 1, 1, 1, 8, 20, 2, 1, 1, 12},
+            {6, 1, 1, 8, 1, 2, 20, 2, 1, 14},
+            {4, 1, 6, 1, 1, 1, 2, 20, 2, 16},
+            {2, 4, 1, 1, 1, 1, 1, 2, 20, 18},
+            {2, 1, 1, 1, 1, 1, 1, 1, 2, 20}
     };
 
 
     public int[][] pTablesBase = {
-            {50, 10, 10, 10, 10, 10, 10, 10, 10, 50},
-            {2, 50, 20, 20, 20, 20, 20, 20, 20, 50},
-            {0, 20, 50, 30, 30, 30, 30, 30, 20, 50},
-            {9, 0, 0, 0, 40, 40, 40, 30, 20, 50},
-            {8, 20, 0, 50, 50, 50, 40, 30, 20, 50},
-            {7, 20, 30, 50, 50, 50, 40, 30, 20, 50},
-            {6, 0, 30, 50, 50, 50, 50, 30, 20, 50},
-            {5, 30, 30, 0, 30, 30, 0, 50, 20, 50},
-            {4, 30, 0, 20, 20, 20, 20, 20, 50, 10},
-            {0, 4, 2, 2, 2, 2, 2, 2, 2, 50}
+            {20, 16, 1, 1, 1, 1, 1, 1, 1, 2},
+            {16, 20, 1, 1, 1, 1, 1, 1, 4, 4},
+            {14, 1, 20, 1, 1, 1, 1, 6, 1, 6},
+            {12, 1, 1, 20, 2, 2, 8, 1, 1, 8},
+            {10, 1, 1, 2, 20, 10, 1, 1, 1, 10},
+            {8, 1, 1, 1, 8, 20, 1, 1, 1, 12},
+            {6, 1, 1, 8, 1, 1, 20, 1, 1, 14},
+            {4, 1, 6, 1, 1, 1, 1, 20, 1, 16},
+            {2, 4, 1, 1, 1, 1, 1, 1, 20, 18},
+            {2, 1, 1, 1, 1, 1, 1, 1, 1, 20}
     };
 
     public int[][] getOutMode = {
@@ -202,14 +202,19 @@ public class GameplayScreen implements Screen {
         return max;
     }
 
+
+
     private Location actAccordingly(Location loc) {
         Location max = getMax(loc, pTables);
         ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
-
         if(wumpusWorld.getValue(loc) >= 10 && wumpusWorld.getValue(loc) < 14) { // indicators
-            pTables[loc.getRow()][loc.getCol()] -= 10000;
             moves.pop();
-            pTables[moves.peek().getRow()][moves.peek().getCol()] -= 5;
+            if(pTables[moves.peek().getRow()][moves.peek().getCol()] < -50) {
+                // if the last move then just go anyway
+                return max;
+            }
+            pTables[loc.getRow()][loc.getCol()] -= 10000;
+            pTables[moves.peek().getRow()][moves.peek().getCol()] -= 15;
             return moves.peek();
         } else if(wumpusWorld.getValue(dude.getLoc()) == 14) { // glitter
             if(!getOut) {
@@ -232,51 +237,49 @@ public class GameplayScreen implements Screen {
 
     public void ai2() {
         if (nextMove < System.currentTimeMillis()) {
-                if (!getOut) {
-                    moves.push(dude.getLoc()); // push the dudes current loc
-                    checkBoardForBaddies(pTables);
-                    pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] += 5; // Don't want him back tracking
+            if (!getOut) {
+                moves.push(dude.getLoc()); // push the dudes current loc
+                checkBoardForBaddies(pTables);
+                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 20; // Don't want him back tracking
                     /*
                     If we have been through the possible moves before, subtrack and don't go there again
                      */
-                    ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
-                    for(Location temp: arr) {
-                        for(Location locs: moves) {
-                            if(locs.equals(temp)) {
-                                pTables[temp.getRow()][temp.getCol()] -= 10;
-                            }
-                        }
-                    }
-                    // What to do if we are on a given tile, such as warning/gold
-                    dude.setLoc(actAccordingly(dude.getLoc()));
-                    } else {
-                    checkBoardForBaddies(pTables);
-                    moves.push(dude.getLoc()); // push the dudes current loc
-                    if (x == 2) {
-                        for (int row = 0; row < pTables.length; row++) {
-                            for (int col = 0; col < pTables[row].length; col++) {
-                                pTables[row][col] += getOutMode[row][col]; // how the FUCK does this work? this adds to the original pTables, not even the getOutMode
-                            }
-                        }
-                        x = 3;
-                    }
-                    pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
-
-                    if (wumpusWorld.isValid(dude.getLoc().getRow() + 1,dude.getLoc().getCol()) && pTables[dude.getLoc().getRow() + 1][dude.getLoc().getCol()] > -100) {
-                        dude.setLoc(new Location(dude.getLoc().getRow() + 1, dude.getLoc().getCol()));
-                    } else {
-                        if (wumpusWorld.isValid(dude.getLoc().getRow(),dude.getLoc().getCol() - 1) && pTables[dude.getLoc().getRow()][dude.getLoc().getCol() - 1] > -100) {
-                            dude.setLoc(new Location(dude.getLoc().getRow(), dude.getLoc().getCol() - 1));
+                ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
+                for(Location temp: arr) {
+                    for(Location locs: moves) {
+                        if(locs.equals(temp)) {
+                            pTables[temp.getRow()][temp.getCol()] -= 20;
                         }
                     }
                 }
+                // What to do if we are on a given tile, such as warning/gold
+                dude.setLoc(actAccordingly(dude.getLoc()));
+            } else {
+                checkBoardForBaddies(pTables);
+                moves.push(dude.getLoc()); // push the dudes current loc
+                if (x == 2) {
+                    for (int row = 0; row < pTables.length; row++) {
+                        for (int col = 0; col < pTables[row].length; col++) {
+                            pTables[row][col] += getOutMode[row][col]; // how the FUCK does this work? this adds to the original pTables, not even the getOutMode
+                        }
+                    }
+                    x = 3;
+                }
+                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
 
-
+                if (wumpusWorld.isValid(dude.getLoc().getRow() + 1, dude.getLoc().getCol()) && pTables[dude.getLoc().getRow() + 1][dude.getLoc().getCol()] > -100) {
+                    dude.setLoc(new Location(dude.getLoc().getRow() + 1, dude.getLoc().getCol()));
+                } else if (wumpusWorld.isValid(dude.getLoc().getRow(), dude.getLoc().getCol() - 1) && pTables[dude.getLoc().getRow()][dude.getLoc().getCol() - 1] > -100) {
+                    dude.setLoc(new Location(dude.getLoc().getRow(), dude.getLoc().getCol() - 1));
+                } else {
+                    actAccordingly(dude.getLoc());
+                }
+            }
             wumpusWorld.setVisibile(dude.getLoc());
             score--;
             nextMove = System.currentTimeMillis() + delay;
-            }
         }
+    }
 
 
 
@@ -334,9 +337,9 @@ public class GameplayScreen implements Screen {
             else {
                 wumpusWorld.placeTexture(selected, mouse_x, mouse_y);
                 selected = null;
-                }
             }
         }
+    }
 
 
     public void drawToolbar() {
@@ -413,7 +416,6 @@ public class GameplayScreen implements Screen {
         wumpusWorld.draw(spriteBatch);
         dude.draw(spriteBatch);
         drawToolbar();
-        drawPTables(pTables);
         spriteBatch.end();
         // add delay is the alternate method instead of using isValid on dude
     }
