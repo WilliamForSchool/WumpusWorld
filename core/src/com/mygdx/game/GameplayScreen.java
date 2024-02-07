@@ -51,7 +51,7 @@ public class GameplayScreen implements Screen {
     private Stack<Location> moves = new Stack<>();
 
     //timer var?
-    private long delay = 200; // ms
+    private long delay = 50; // ms
     private long nextMove = System.currentTimeMillis() + delay;
 
     //runs one time, at the very beginning
@@ -108,31 +108,32 @@ public class GameplayScreen implements Screen {
     // JANKY BUT KEEP IT OUT OF METHOD
     int x = 2;
     public int[][] pTables = {
-            {20, 16, 1, 1, 1, 1, 1, 1, 1, 2},
-            {16, 20, 2, 1, 1, 1, 1, 1, 4, 4},
-            {14, 2, 20, 2, 1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 20, 2, 2, 8, 1, 1, 8},
-            {10, 1, 1, 2, 20, 10, 1, 1, 1, 10},
-            {8, 1, 1, 1, 8, 20, 2, 1, 1, 12},
-            {6, 1, 1, 8, 1, 2, 20, 2, 1, 14},
-            {4, 1, 6, 1, 1, 1, 2, 20, 2, 16},
-            {2, 4, 1, 1, 1, 1, 1, 2, 20, 18},
-            {2, 1, 1, 1, 1, 1, 1, 1, 2, 20}
+            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {16, 20, 2, 1, -1, 1, 1, 1, 4, 4},
+            {14, 2, 20, 2, -1, 1, 1, 6, 1, 6},
+            {12, 1, 2, 5, 10, 10, 8, 1, 1, 8},
+            {10, 1, 1, 2, 20, 20, 6, 1, 1, 10},
+            {8, 1, 1, 1, 8, 20, 8, 1, 1, 12},
+            {6, 1, 1, 8, -1, 4, 20, 8, 1, 14},
+            {3, 5, 6, 1, -1, 1, 6, 20, 6, 16},
+            {2, 4, 1, 1, -1, 1, 1, 8, 20, 18},
+            {2, 1, 1, 1, -1, 1, 1, 1, 10, 20}
     };
 
 
     public int[][] pTablesBase = {
-            {20, 16, 1, 1, 1, 1, 1, 1, 1, 2},
-            {16, 20, 1, 1, 1, 1, 1, 1, 4, 4},
-            {14, 1, 20, 1, 1, 1, 1, 6, 1, 6},
-            {12, 1, 1, 20, 2, 2, 8, 1, 1, 8},
-            {10, 1, 1, 2, 20, 10, 1, 1, 1, 10},
-            {8, 1, 1, 1, 8, 20, 1, 1, 1, 12},
-            {6, 1, 1, 8, 1, 1, 20, 1, 1, 14},
-            {4, 1, 6, 1, 1, 1, 1, 20, 1, 16},
-            {2, 4, 1, 1, 1, 1, 1, 1, 20, 18},
-            {2, 1, 1, 1, 1, 1, 1, 1, 1, 20}
+            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {16, 20, 2, 1, -1, 1, 1, 1, 4, 4},
+            {14, 2, 20, 2, -1, 1, 1, 6, 1, 6},
+            {12, 1, 2, 5, 10, 10, 8, 1, 1, 8},
+            {10, 1, 1, 2, 20, 20, 6, 1, 1, 10},
+            {8, 1, 1, 1, 8, 20, 8, 1, 1, 12},
+            {6, 1, 1, 8, -1, 4, 20, 8, 1, 14},
+            {3, 5, 6, 1, -1, 1, 6, 20, 6, 16},
+            {2, 4, 1, 1, -1, 1, 1, 8, 20, 18},
+            {2, 1, 1, 1, -1, 1, 1, 1, 10, 20}
     };
+
 
     public int[][] getOutMode = {
             {60, 60, 60, 60, 60, 60, 60, 60, 60, 60},
@@ -195,8 +196,12 @@ public class GameplayScreen implements Screen {
         ArrayList<Location> arr = dude.getValidLocsAroundMe(loc);
         Location max = arr.get(0);
         for (Location temp : arr) {
-            if (board[temp.getRow()][temp.getCol()] > board[max.getRow()][max.getCol()]) {
-                max = temp;
+            for(Location temp2: moves) {
+                if(!(temp.equals(temp2))) {
+                    if (board[temp.getRow()][temp.getCol()] > board[max.getRow()][max.getCol()]) {
+                        max = temp;
+                }
+            }
             }
         }
         return max;
@@ -205,14 +210,14 @@ public class GameplayScreen implements Screen {
 
 
     private Location actAccordingly(Location loc) {
+
         Location max = getMax(loc, pTables);
+        System.out.println(max);
         ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
+
         if(wumpusWorld.getValue(loc) >= 10 && wumpusWorld.getValue(loc) < 14) { // indicators
             moves.pop();
-            if(pTables[moves.peek().getRow()][moves.peek().getCol()] < -50) {
-                // if the last move then just go anyway
-                return max;
-            }
+
             pTables[loc.getRow()][loc.getCol()] -= 10000;
             pTables[moves.peek().getRow()][moves.peek().getCol()] -= 15;
             return moves.peek();
@@ -240,7 +245,8 @@ public class GameplayScreen implements Screen {
             if (!getOut) {
                 moves.push(dude.getLoc()); // push the dudes current loc
                 checkBoardForBaddies(pTables);
-                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 20; // Don't want him back tracking
+                IncentivizeUnknown(pTables);
+                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 1; // Don't want him back tracking
                     /*
                     If we have been through the possible moves before, subtrack and don't go there again
                      */
@@ -248,7 +254,7 @@ public class GameplayScreen implements Screen {
                 for(Location temp: arr) {
                     for(Location locs: moves) {
                         if(locs.equals(temp)) {
-                            pTables[temp.getRow()][temp.getCol()] -= 20;
+                            pTables[temp.getRow()][temp.getCol()] -= 10;
                         }
                     }
                 }
@@ -266,6 +272,9 @@ public class GameplayScreen implements Screen {
                     x = 3;
                 }
                 pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
+                if(wumpusWorld.getValue(dude.getLoc()) >= 10 && wumpusWorld.getValue(dude.getLoc()) < 14) { // indicators
+                    pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
+                }
 
                 if (wumpusWorld.isValid(dude.getLoc().getRow() + 1, dude.getLoc().getCol()) && pTables[dude.getLoc().getRow() + 1][dude.getLoc().getCol()] > -100) {
                     dude.setLoc(new Location(dude.getLoc().getRow() + 1, dude.getLoc().getCol()));
@@ -274,6 +283,8 @@ public class GameplayScreen implements Screen {
                 } else {
                     actAccordingly(dude.getLoc());
                 }
+
+
             }
             wumpusWorld.setVisibile(dude.getLoc());
             score--;
@@ -416,6 +427,7 @@ public class GameplayScreen implements Screen {
         wumpusWorld.draw(spriteBatch);
         dude.draw(spriteBatch);
         drawToolbar();
+        drawPTables(pTables);
         spriteBatch.end();
         // add delay is the alternate method instead of using isValid on dude
     }
