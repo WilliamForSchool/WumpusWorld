@@ -109,29 +109,29 @@ public class GameplayScreen implements Screen {
     int x = 2;
     public int[][] pTables = {
             {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
-            {16, 20, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 20, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 10, 10, 8, 1, 1, 8},
-            {10, 1, 1, 2, 20, 20, 6, 1, 1, 10},
-            {8, 1, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 1, 1, 8, -1, 4, 20, 8, 1, 14},
-            {3, 5, 6, 1, -1, 1, 6, 20, 6, 16},
-            {2, 4, 1, 1, -1, 1, 1, 8, 20, 18},
-            {2, 1, 1, 1, -1, 1, 1, 1, 10, 20}
+            {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
+            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
+            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
+            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
+            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
+            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
+            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
     };
 
 
     public int[][] pTablesBase = {
             {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
-            {16, 20, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 20, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 10, 10, 8, 1, 1, 8},
-            {10, 1, 1, 2, 20, 20, 6, 1, 1, 10},
-            {8, 1, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 1, 1, 8, -1, 4, 20, 8, 1, 14},
-            {3, 5, 6, 1, -1, 1, 6, 20, 6, 16},
-            {2, 4, 1, 1, -1, 1, 1, 8, 20, 18},
-            {2, 1, 1, 1, -1, 1, 1, 1, 10, 20}
+            {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
+            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
+            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
+            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
+            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
+            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
+            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
     };
 
 
@@ -245,7 +245,7 @@ public class GameplayScreen implements Screen {
             if (!getOut) {
                 moves.push(dude.getLoc()); // push the dudes current loc
                 checkBoardForBaddies(pTables);
-                IncentivizeUnknown(pTables);
+                //IncentivizeUnknown(pTables);
                 pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 1; // Don't want him back tracking
                     /*
                     If we have been through the possible moves before, subtrack and don't go there again
@@ -272,16 +272,18 @@ public class GameplayScreen implements Screen {
                     x = 3;
                 }
                 pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
-                if(wumpusWorld.getValue(dude.getLoc()) >= 10 && wumpusWorld.getValue(dude.getLoc()) < 14) { // indicators
-                    pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
-                }
 
-                if (wumpusWorld.isValid(dude.getLoc().getRow() + 1, dude.getLoc().getCol()) && pTables[dude.getLoc().getRow() + 1][dude.getLoc().getCol()] > -100) {
-                    dude.setLoc(new Location(dude.getLoc().getRow() + 1, dude.getLoc().getCol()));
-                } else if (wumpusWorld.isValid(dude.getLoc().getRow(), dude.getLoc().getCol() - 1) && pTables[dude.getLoc().getRow()][dude.getLoc().getCol() - 1] > -100) {
-                    dude.setLoc(new Location(dude.getLoc().getRow(), dude.getLoc().getCol() - 1));
+
+                if(wumpusWorld.getValue(dude.getLoc()) >= 10 && wumpusWorld.getValue(dude.getLoc()) < 14) { // indicators
+                    dude.setLoc(actAccordingly(dude.getLoc()));
                 } else {
-                    actAccordingly(dude.getLoc());
+                    if (wumpusWorld.isValid(dude.getLoc().getRow() + 1, dude.getLoc().getCol()) && pTables[dude.getLoc().getRow() + 1][dude.getLoc().getCol()] > -100) {
+                        dude.setLoc(new Location(dude.getLoc().getRow() + 1, dude.getLoc().getCol()));
+                    } else if (wumpusWorld.isValid(dude.getLoc().getRow(), dude.getLoc().getCol() - 1) && pTables[dude.getLoc().getRow()][dude.getLoc().getCol() - 1] > -100) {
+                        dude.setLoc(new Location(dude.getLoc().getRow(), dude.getLoc().getCol() - 1));
+                    } else {
+                        dude.setLoc(actAccordingly(dude.getLoc()));
+                    }
                 }
 
 
