@@ -196,12 +196,8 @@ public class GameplayScreen implements Screen {
         ArrayList<Location> arr = dude.getValidLocsAroundMe(loc);
         Location max = arr.get(0);
         for (Location temp : arr) {
-            for(Location temp2: moves) {
-                if(!(temp.equals(temp2))) {
-                    if (board[temp.getRow()][temp.getCol()] > board[max.getRow()][max.getCol()]) {
-                        max = temp;
-                }
-            }
+            if(!(temp.equals(dude.getLoc())) && pTables[max.getRow()][max.getCol()] < pTables[temp.getRow()][temp.getCol()]) {
+                max = temp;
             }
         }
         return max;
@@ -214,10 +210,16 @@ public class GameplayScreen implements Screen {
         Location max = getMax(loc, pTables);
         System.out.println(max);
         ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
-
         if(wumpusWorld.getValue(loc) >= 10 && wumpusWorld.getValue(loc) < 14) { // indicators
-            moves.pop();
 
+            for(Location locs: arr) {
+                if(!locs.equals(dude.getLoc())) {
+                    pTables[locs.getRow()][locs.getCol()] += 10;
+                }
+            }
+
+
+            moves.pop();
             pTables[loc.getRow()][loc.getCol()] -= 10000;
             pTables[moves.peek().getRow()][moves.peek().getCol()] -= 15;
             return moves.peek();
@@ -429,7 +431,6 @@ public class GameplayScreen implements Screen {
         wumpusWorld.draw(spriteBatch);
         dude.draw(spriteBatch);
         drawToolbar();
-        drawPTables(pTables);
         spriteBatch.end();
         // add delay is the alternate method instead of using isValid on dude
     }
