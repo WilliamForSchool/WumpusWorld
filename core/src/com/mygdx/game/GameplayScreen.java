@@ -108,30 +108,30 @@ public class GameplayScreen implements Screen {
     // JANKY BUT KEEP IT OUT OF METHOD
     int x = 2;
     public int[][] pTables = {
-            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
-            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
-            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
+            {14, 2, 2, 2, -1, 1, 1, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 1, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 1, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 1, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 1, 4},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
+            {2, 2, 2, 1, -1, 1, 1, 1, 10, 4}
     };
 
 
     public int[][] pTablesBase = {
-            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
-            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
-            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
+            {14, 2, 2, 2, -1, 1, 1, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 1, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 1, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 1, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 1, 4},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
+            {2, 2, 2, 1, -1, 1, 1, 1, 10, 4}
     };
 
 
@@ -196,7 +196,8 @@ public class GameplayScreen implements Screen {
         ArrayList<Location> arr = dude.getValidLocsAroundMe(loc);
         Location max = arr.get(0);
         for (Location temp : arr) {
-            if(!(temp.equals(dude.getLoc())) && pTables[max.getRow()][max.getCol()] < pTables[temp.getRow()][temp.getCol()]) {
+            if(!(temp.equals(dude.getLoc())) && board[max.getRow()][max.getCol()] < board[temp.getRow()][temp.getCol()]) {
+                System.out.println("new max");
                 max = temp;
             }
         }
@@ -248,7 +249,7 @@ public class GameplayScreen implements Screen {
                 moves.push(dude.getLoc()); // push the dudes current loc
                 checkBoardForBaddies(pTables);
                 //IncentivizeUnknown(pTables);
-                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 1; // Don't want him back tracking
+                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 8; // Don't want him back tracking
                     /*
                     If we have been through the possible moves before, subtrack and don't go there again
                      */
