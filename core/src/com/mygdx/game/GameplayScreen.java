@@ -110,28 +110,28 @@ public class GameplayScreen implements Screen {
     public int[][] pTables = {
             {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 4},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 4},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 4},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 4},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 4},
+            {14, 2, 2, 2, -1, 2, 2, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 2, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 2, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 8, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 10, 4},
             {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
             {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 4}
+            {2, 2, 2, 1, -1, 1, 1, 8, 10, 4}
     };
 
 
     public int[][] pTablesBase = {
             {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 4},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 4},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 4},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 4},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 4},
+            {14, 2, 2, 2, -1, 2, 2, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 2, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 2, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 8, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 10, 4},
             {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
             {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 4}
+            {2, 2, 2, 1, -1, 1, 1, 8, 10, 4}
     };
 
 
@@ -242,6 +242,48 @@ public class GameplayScreen implements Screen {
         return max;
     }
 
+    public int convertLocToX(Location loc) {
+        return (loc.getCol()) * 50 + 50;
+    }
+
+
+    public int convertLocToY(Location loc) {
+        return (loc.getRow()) * 50 + 50;
+    }
+
+    private int lineFunction(int x, int slope, Location loc) {
+        return slope*(x - convertLocToX(loc)) + convertLocToY(loc);
+    }
+
+
+
+    public ArrayList<Location> returnLocsToCoordLoc(Location source, Location dest) {
+        int slope = 0;
+        try {
+            slope = ((convertLocToY(source) + 1) - (convertLocToY(dest) + 1)) / ((convertLocToX(source)) - (convertLocToX(dest)));
+        } catch(Exception e) {
+            slope = 0;
+        }
+        int x = convertLocToX(dest);
+        ArrayList<Location> arr = new ArrayList<>();
+        if(x != convertLocToX(source)) {
+            while (x != convertLocToX(source)) {
+                arr.add(WumpusWorld.convertCoordsToLoc(x, lineFunction(x, slope, dest)));
+                x--;
+            }
+        } else {
+            int y = convertLocToY(dest);
+            while (y != convertLocToY(source)) {
+                System.out.println("x:" + x + " y: " + y);
+                arr.add(WumpusWorld.convertCoordsToLoc(x, y));
+                y++;
+            }
+        }
+        return arr;
+    }
+
+
+
 
     public void ai2() {
         if (nextMove < System.currentTimeMillis()) {
@@ -330,11 +372,14 @@ public class GameplayScreen implements Screen {
         int startY = 120;
         int startX = 650;
 
+
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             int mouse_x = Gdx.input.getX();
             int mouse_y = Gdx.input.getY();
 
             wumpusWorld.convertCoordsToLoc(mouse_x, mouse_y);
+            System.out.println(convertLocToY(wumpusWorld.convertCoordsToLoc(Gdx.input.getX(), Gdx.input.getY())));
+
             if(selected == null) {
                 if(mouse_x >= startX && mouse_x <= startX + 50 && mouse_y >= startY && mouse_y <= startY + 50) {
                     selected = WumpusWorld.spiderTile;
@@ -382,9 +427,21 @@ public class GameplayScreen implements Screen {
             spriteBatch.draw(selected, Gdx.input.getX() - 30, 740 - Gdx.input.getY());
 
         }
+        defaultFont.draw(spriteBatch, "y: " + Gdx.input.getY(), 100, 100);
     }
 
     //this method runs as fast as it can, repeatedly, constantly looped
+
+
+    private int u = 0;
+    ArrayList<Location> arr2 = returnLocsToCoordLoc(new Location(0, 0), new Location(8, 1));
+
+
+    public void drawCircles(ShapeRenderer shape){
+        for(int i = 0; i < arr2.size(); i++) {
+            shape.circle(convertLocToX(arr2.get(i)), convertLocToY(arr2.get(i)) + 225, 10);
+        }
+    }
     @Override
     public void render(float delta) {
         clearScreen();
@@ -422,13 +479,14 @@ public class GameplayScreen implements Screen {
         //all drawing of shapes MUST be in between begin/end
         shapeRenderer.begin();
 
+        shapeRenderer.setColor(1, 0, 0, 1);
+        shapeRenderer.circle(20, 20, 20);
+
+        drawCircles(shapeRenderer);
         shapeRenderer.end();
 
         //all drawing of graphics MUST be in between begin/end
         spriteBatch.begin();
-
-
-
         wumpusWorld.draw(spriteBatch);
         dude.draw(spriteBatch);
         drawToolbar();
