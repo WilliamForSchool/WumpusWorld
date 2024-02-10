@@ -108,30 +108,30 @@ public class GameplayScreen implements Screen {
     // JANKY BUT KEEP IT OUT OF METHOD
     int x = 2;
     public int[][] pTables = {
-            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
-            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
-            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
+            {14, 2, 2, 2, -1, 2, 2, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 2, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 2, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 8, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 10, 4},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
+            {2, 2, 2, 1, -1, 1, 1, 8, 10, 4}
     };
 
 
     public int[][] pTablesBase = {
-            {20, 16, 1, 1, -1, 1, 1, 1, 1, 2},
+            {20, 16, 1, 1, -1, 1, 4, 2, 2, 2},
             {16, 6, 2, 1, -1, 1, 1, 1, 4, 4},
-            {14, 2, 2, 2, -1, 1, 1, 6, 1, 6},
-            {12, 1, 2, 5, 1, 10, 8, 1, 1, 8},
-            {8, 9, 10, 2, 20, 20, 6, 1, 1, 10},
-            {2, 8, 1, 1, 8, 20, 8, 1, 1, 12},
-            {6, 2, 8, 8, 7, 4, 20, 15, 1, 14},
-            {3, 6, 6, 1, 8, 1, 6, 20, 6, 16},
-            {2, 4, 6, 1, -1, 1, 1, 8, 20, 18},
-            {2, 2, 2, 1, -1, 1, 1, 1, 10, 20}
+            {14, 2, 2, 2, -1, 2, 2, 6, 1, 4},
+            {12, 1, 2, 5, 1, 10, 8, 2, 1, 4},
+            {8, 9, 10, 2, 20, 20, 6, 2, 1, 4},
+            {2, 8, 1, 1, 8, 20, 8, 1, 8, 4},
+            {6, 2, 8, 8, 7, 4, 20, 15, 10, 4},
+            {3, 6, 6, 1, 8, 1, 6, 20, 6, 4},
+            {2, 4, 6, 1, -1, 1, 1, 8, 20, 4},
+            {2, 2, 2, 1, -1, 1, 1, 8, 10, 4}
     };
 
 
@@ -194,10 +194,20 @@ public class GameplayScreen implements Screen {
 
     private Location getMax(Location loc, int[][] board) {
         ArrayList<Location> arr = dude.getValidLocsAroundMe(loc);
+        int c = 0;
         Location max = arr.get(0);
         for (Location temp : arr) {
-            if(!(temp.equals(dude.getLoc())) && pTables[max.getRow()][max.getCol()] < pTables[temp.getRow()][temp.getCol()]) {
+            for(Location locs: moves) {
+                if(temp.equals(locs)) {
+                    c++;
+                }
+            }
+            if(board[max.getRow()][max.getCol()] < board[temp.getRow()][temp.getCol()] && c == arr.size()) {
                 max = temp;
+            } else {
+                if(board[max.getRow()][max.getCol()] < board[temp.getRow()][temp.getCol()]) {
+                        max = temp;
+                }
             }
         }
         return max;
@@ -206,19 +216,14 @@ public class GameplayScreen implements Screen {
 
 
     private Location actAccordingly(Location loc) {
-
         Location max = getMax(loc, pTables);
-        System.out.println(max);
         ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
         if(wumpusWorld.getValue(loc) >= 10 && wumpusWorld.getValue(loc) < 14) { // indicators
-
             for(Location locs: arr) {
                 if(!locs.equals(dude.getLoc())) {
                     pTables[locs.getRow()][locs.getCol()] += 10;
                 }
             }
-
-
             moves.pop();
             pTables[loc.getRow()][loc.getCol()] -= 10000;
             pTables[moves.peek().getRow()][moves.peek().getCol()] -= 15;
@@ -234,6 +239,7 @@ public class GameplayScreen implements Screen {
         } else if(wumpusWorld.getValue(dude.getLoc()) == 4) { // gold
             getOut = true;
             dude.setHasGold(true);
+            dude.setLoc(returnLocsToCoordLoc(dude.getLoc(), new Location(9, 0)));
         }
         else {
             return max;
@@ -241,17 +247,87 @@ public class GameplayScreen implements Screen {
         return max;
     }
 
+    public int convertLocToX(Location loc) {
+        return (loc.getCol()) * 50 + 50;
+    }
 
+
+    public int convertLocToY(Location loc) {
+        return Math.abs((loc.getRow()) * 50) + 50;
+    }
+
+    private double lineFunction(int x, double slope, Location loc) {
+        return slope*(x - convertLocToX(loc)) + convertLocToY(loc);
+    }
+
+
+    private ArrayList<Location> pathToStart(Location source, Location dest_) {
+        ArrayList<Location> arr = new ArrayList<>();
+        Location real = returnLocsToCoordLoc(source, dest_);
+        while(!real.equals(dest_)) {
+            arr.add(real);
+            real = returnLocsToCoordLoc(real, dest_);
+        }
+        arr.add(real);
+        return arr;
+    }
+
+    private ArrayList<Location> revisedPath(Location source, Location dest_) {
+        ArrayList<Location> arr = pathToStart(source, dest_);
+        for(Location loc: arr) {
+            if(pTables[loc.getRow()][loc.getCol()] < -3000) {
+                // baddy
+                arr = pathToStart(source, getMax(loc, pTables));
+                }
+        }
+        System.out.println(arr);
+        return arr;
+    }
+
+
+
+    public Location returnLocsToCoordLoc(Location source, Location dest_) {
+        double slope = 0;
+        try {
+            slope = (double)(convertLocToY(dest_) - convertLocToY(source)) / (convertLocToX(dest_) - convertLocToX(source));
+        } catch(Exception ignored) {
+        }
+        if((convertLocToX(dest_) - convertLocToX(source) == 0)) {
+            slope = 0;
+        }
+        if(!source.equals(dest_)) {
+            if (slope != 0) {
+                if(slope < -0.3 && slope > -1) {
+                    return WumpusWorld.convertCoordsToLoc(convertLocToX(source) - 40, (int)lineFunction(convertLocToX(source), slope, source));
+                } else {
+                    return WumpusWorld.convertCoordsToLoc(convertLocToX(source), (int)lineFunction(convertLocToX(source), slope, source) + 40);
+                }
+            } else {
+                if(dest_.getRow() == source.getRow()) {
+                    return WumpusWorld.convertCoordsToLoc(convertLocToX(source) - 40, (int) lineFunction(convertLocToX(source), 0, source));
+                } else {
+                    return WumpusWorld.convertCoordsToLoc(convertLocToX(source), convertLocToY(source) + 50);
+                }
+            }
+        }
+
+         return source;
+    }
+
+
+
+
+
+    int y = 4;
     public void ai2() {
         if (nextMove < System.currentTimeMillis()) {
             if (!getOut) {
                 moves.push(dude.getLoc()); // push the dudes current loc
+
                 checkBoardForBaddies(pTables);
                 //IncentivizeUnknown(pTables);
-                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 1; // Don't want him back tracking
-                    /*
-                    If we have been through the possible moves before, subtrack and don't go there again
-                     */
+                pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 8; // Don't want him back tracking
+
                 ArrayList<Location> arr = dude.getValidLocsAroundMe(dude.getLoc());
                 for(Location temp: arr) {
                     for(Location locs: moves) {
@@ -276,6 +352,8 @@ public class GameplayScreen implements Screen {
                 pTables[dude.getLoc().getRow()][dude.getLoc().getCol()] -= 100;
 
 
+
+
                 if(wumpusWorld.getValue(dude.getLoc()) >= 10 && wumpusWorld.getValue(dude.getLoc()) < 14) { // indicators
                     dude.setLoc(actAccordingly(dude.getLoc()));
                 } else {
@@ -289,12 +367,39 @@ public class GameplayScreen implements Screen {
                 }
 
 
+
+                /*
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ArrayList<Location> moveSet = revisedPath(dude.getLoc(), new Location(9, 0));
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if(moveSet.size() != 0) {
+                    dude.setLoc(moveSet.get(0));
+                    moveSet.remove(0);
+                    if(wumpusWorld.getValue(dude.getLoc()) >= 10 && wumpusWorld.getValue(dude.getLoc()) < 14) { // indicators
+                        moveSet = revisedPath(dude.getLoc(), new Location(9, 0));
+                    }
+                }
+
+                 */
+
+
+
+
             }
             wumpusWorld.setVisibile(dude.getLoc());
             score--;
             nextMove = System.currentTimeMillis() + delay;
+
+            }
         }
-    }
 
 
 
@@ -329,11 +434,13 @@ public class GameplayScreen implements Screen {
         int startY = 120;
         int startX = 650;
 
+
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             int mouse_x = Gdx.input.getX();
             int mouse_y = Gdx.input.getY();
 
             wumpusWorld.convertCoordsToLoc(mouse_x, mouse_y);
+
             if(selected == null) {
                 if(mouse_x >= startX && mouse_x <= startX + 50 && mouse_y >= startY && mouse_y <= startY + 50) {
                     selected = WumpusWorld.spiderTile;
@@ -367,6 +474,7 @@ public class GameplayScreen implements Screen {
         spriteBatch.draw(WumpusWorld.goldTile, 650, 435);
         spriteBatch.draw(WumpusWorld.groundTile, 650, 380);
         spriteBatch.draw(trophy, 650, 325);
+
         if(aiRunning) {
             defaultFont.draw(spriteBatch, "Untoggle Ai", 720, 355);
         } else {
@@ -381,9 +489,16 @@ public class GameplayScreen implements Screen {
             spriteBatch.draw(selected, Gdx.input.getX() - 30, 740 - Gdx.input.getY());
 
         }
+        defaultFont.draw(spriteBatch, "y: " + Gdx.input.getY(), 100, 100);
     }
 
     //this method runs as fast as it can, repeatedly, constantly looped
+
+
+    private int u = 0;
+
+
+
     @Override
     public void render(float delta) {
         clearScreen();
@@ -421,13 +536,13 @@ public class GameplayScreen implements Screen {
         //all drawing of shapes MUST be in between begin/end
         shapeRenderer.begin();
 
+        shapeRenderer.setColor(1, 0, 0, 1);
+        shapeRenderer.circle(20, 20, 20);
+
         shapeRenderer.end();
 
         //all drawing of graphics MUST be in between begin/end
         spriteBatch.begin();
-
-
-
         wumpusWorld.draw(spriteBatch);
         dude.draw(spriteBatch);
         drawToolbar();
